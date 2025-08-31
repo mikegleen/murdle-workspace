@@ -18,22 +18,15 @@ import (
 )
 
 /*
-The data file contains one row for each cipher.
-Blank rows and rows with '#' in column 1 are ignored.
-
-Columns
-1-2     Puzzle number in decimal
-3-n 	The cipher
+	See lib/read_cipher.go for a description of the data file format.
 */
 const DATAFILE = "/Users/mlg/goprj/murdle_workspace/data.txt"
 const DICTFILE = "/Users/mlg/pyprj/caesar/data/dictionary.txt"
 
 const WORDLIMIT = 51  // max word size is 50
 const SHOWTIMES = false
+const SHOWCOUNTS = false  // number of words in each dictionary slot
 
-// func nextline(scanner bufio.Scanner) (string, error) {
-
-// }
 func SortString(w string) string {
 	s := strings.Split(w, "")
 	sort.Strings(s)
@@ -47,27 +40,26 @@ func main() {
 	}
 	totstart := time.Now()
 
-	/*************************
-		Load the dictionary
-	**************************/
+	/******************************
+		Create the empty dictionary
+	*******************************/
 
-	// wordDict := make(map[string]struct{})
 	wordDict := make([]map[string]string, WORDLIMIT)
 	for w := 1; w < WORDLIMIT; w++ {
 		wordDict[w] = make(map[string]string)
 	}
-	datafile, err := os.Open(DICTFILE)
-	if err != nil {
-		panic(fmt.Sprint("Cannot open ", DATAFILE))
-	}
 
 	/*************************
-		Read the cipher
+		Read the dictionary
 	**************************/
 
 	maxlen := 0
 	nwords := 0
-	scanner := bufio.NewScanner(datafile)
+	dictfile, err := os.Open(DICTFILE)
+	if err != nil {
+		panic(fmt.Sprint("Cannot open ", DATAFILE))
+	}
+	scanner := bufio.NewScanner(dictfile)
 	for scanner.Scan() {
 		line := scanner.Text()
 		err = scanner.Err()
@@ -92,15 +84,32 @@ func main() {
 		}
 		wordDict[lenword][line] = SortString(line)
 	}
-	datafile.Close()
+	dictfile.Close()
+
 	fmt.Printf("Dictionary contains %d words.\n", nwords)
 	fmt.Printf("Maximum word length: %d.\n", maxlen)
+
+	if SHOWCOUNTS {
+		counts := make([]int, WORDLIMIT)
+		for i := 1; i < WORDLIMIT; i++ {
+			counts[i] = len(wordDict[i])
+		}
+		for i := 1; i < WORDLIMIT; i++ {
+			if counts[i] > 0 {
+				fmt.Println(i, counts[i])
+			}
+		}
+	}
+
+	/*************************
+		Get the cipher
+	**************************/
+
 	c, _ := strconv.Atoi(os.Args[1]) // get the cipher number
 	ciphertext, err := lib.ReadCipher(DATAFILE, c)
 	if err != nil {
 		panic(err)
 	}
-
 	reg, _ := regexp.Compile("[^A-Z]+") // remove everything except letters
 	words := strings.Fields(ciphertext)
 

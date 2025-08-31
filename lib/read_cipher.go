@@ -18,7 +18,7 @@ Field
 1       Puzzle number in decimal
 2       Cipher number on page
 3       Cipher type
-3-n 	The cipher
+4-n 	The cipher
 
 The cipher types are:
 A Detecive Code
@@ -69,6 +69,6 @@ func ReadCipher(filename string, key int) (string, error) {
 			return strings.Join(lineFields[3:], " "), nil
 		}
 	}
-	return "", fmt.Errorf("No find cipher %d", key)
+	return "", fmt.Errorf("no find cipher %d", key)
 
 }
