@@ -25,7 +25,6 @@ A Detecive Code
 B Anagrams
 C Caesar
 */
-const DATAFILE = "data.txt"
 
 func ReadCipher(filename string, key int) (string, error) {
 	// Allow the user to enter just the puzzle number without the trailing cipher number.
