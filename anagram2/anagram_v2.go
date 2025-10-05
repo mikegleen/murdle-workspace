@@ -22,6 +22,7 @@ import (
 */
 const DATAFILE = "/Users/mlg/goprj/murdle_workspace/data.txt"
 const DICTFILE = "/Users/mlg/pyprj/caesar/data/dictionary.txt"
+const SHORTDICTFILE = "/Users/mlg/pyprj/caesar/data/short_words.txt"
 
 const WORDLIMIT = 51  // max word size is 50
 const SHOWTIMES = false
@@ -33,31 +34,13 @@ func SortString(w string) string {
 	return strings.Join(s, "")
 }
 
-func main() {
-
-	if len(os.Args) < 2 {
-		panic("\nOne parameter required, the cipher number.")
-	}
-	totstart := time.Now()
-
-	/******************************
-		Create the empty dictionary
-	*******************************/
-
-	wordDict := make([]map[string]string, WORDLIMIT)
-	for w := 1; w < WORDLIMIT; w++ {
-		wordDict[w] = make(map[string]string)
-	}
-
-	/*************************
-		Read the dictionary
-	**************************/
-
+func read_dict(dict []map[string]string, dictfilename string) (int, int) {
 	maxlen := 0
 	nwords := 0
-	dictfile, err := os.Open(DICTFILE)
+
+	dictfile, err := os.Open(dictfilename)
 	if err != nil {
-		panic(fmt.Sprint("Cannot open ", DATAFILE))
+		panic(fmt.Sprint("Cannot open ", dictfilename))
 	}
 	scanner := bufio.NewScanner(dictfile)
 	for scanner.Scan() {
@@ -82,9 +65,41 @@ func main() {
 		if lenword >= WORDLIMIT {
 			panic(fmt.Sprintf("\"%v\" in dictionary exceeds %d characters. Length = %d\n", line, WORDLIMIT, lenword))
 		}
-		wordDict[lenword][line] = SortString(line)
+		dict[lenword][line] = SortString(line)
 	}
 	dictfile.Close()
+	return maxlen, nwords
+}
+
+
+func main() {
+
+	if len(os.Args) < 2 {
+		panic("\nOne parameter required, the cipher number.")
+	}
+	totstart := time.Now()
+
+	/******************************
+		Create the empty dictionary
+	*******************************/
+
+	wordDict := make([]map[string]string, WORDLIMIT)
+	for w := 1; w < WORDLIMIT; w++ {
+		wordDict[w] = make(map[string]string)
+	}
+
+	/*************************
+		Read the dictionary
+	**************************/
+	
+	m, n := read_dict(wordDict, DICTFILE)
+	maxlen := m
+	nwords := n
+	m, n = read_dict(wordDict, SHORTDICTFILE)
+	if m > maxlen {
+		maxlen = m
+	}
+	nwords += n
 
 	fmt.Printf("Dictionary contains %d words.\n", nwords)
 	fmt.Printf("Maximum word length: %d.\n", maxlen)
@@ -120,7 +135,7 @@ func main() {
 	for _, word := range words {
 		rword := reg.ReplaceAllString(word, "")
 		fmt.Println("word: ", rword)
-		guesses := make(map[string]struct{})
+		guesses := make(map[string]struct{})  // effectively a "set"
 		start := time.Now()
 		lenword := len(word)
 		if lenword >= WORDLIMIT {
