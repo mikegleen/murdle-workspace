@@ -19,16 +19,12 @@ import (
 )
 
 /*
-The data file contains one row for each cipher.
-Blank rows and rows with '#' in column 1 are ignored.
-
-Columns
-1-2     Puzzle number in decimal
-3-n 	The cipher
+	See read_cipher.go for a description of the input data.
 */
+
 const DATAFILE = "/Users/mlg/goprj/murdle_workspace/data.txt"
 const DICTFILE = "/Users/mlg/pyprj/caesar/data/dictionary.txt"
-
+const VERBOS = 1
 // func nextline(scanner bufio.Scanner) (string, error) {
 
 // }
@@ -83,9 +79,7 @@ func main() {
 	}
 
 	reg, _ := regexp.Compile("[^A-Z]+") // remove everything except letters
-	// words := strings.Fields(cipher[c])
 	words := strings.Fields(ciphertext)
-	// fmt.Println("cipher:", cipher[c], "\nwords: ", words)
 	fmt.Println("\nwords: ", words)
 	for _, word := range words {
 		rword := reg.ReplaceAllString(word, "")
@@ -95,13 +89,11 @@ func main() {
 		start := time.Now()
 		for _, try := range permute.Permutations(w) {
 			stry := string(try)
-			// fmt.Println("try: ",)
 			// If there are repeated letters, the same guess will be printed multiple times.
 			_, found := guesses[stry]
 			if found {
 				continue
 			}
-			// fmt.Println("try: ", stry)
 			_, found = wordDict[stry]
 			if found {
 				guesses[stry] = struct{}{}
@@ -109,12 +101,15 @@ func main() {
 			}
 		}
 		end := time.Now()
-		fmt.Printf("Calculation finished in %s \n", end.Sub(start))
-		// fmt.Println(guesses)
+		if VERBOS > 1 {
+			fmt.Printf("Calculation finished in %s \n", end.Sub(start))
+		}
 		if len(guesses) == 0 {
 			fmt.Printf("%16s %s\n", "", "?")
 		}
 	}
 	totend := time.Now()
-	fmt.Printf("Program finished in %s \n", totend.Sub(totstart))
+	duration := float64(totend.Sub(totstart)) // nanoseconds
+	duration = duration / 1000000000.
+	fmt.Printf("Program finished in %.3f seconds.\n", duration)
 }
