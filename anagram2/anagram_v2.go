@@ -18,15 +18,14 @@ import (
 )
 
 /*
-	See lib/read_cipher.go for a description of the data file format.
+See lib/read_cipher.go for a description of the data file format.
 */
-const DATAFILE = "/Users/mlg/goprj/murdle_workspace/data.txt"
 const DICTFILE = "/Users/mlg/pyprj/caesar/data/dictionary.txt"
 const SHORTDICTFILE = "/Users/mlg/pyprj/caesar/data/short_words.txt"
 
-const WORDLIMIT = 51  // max word size is 50
+const WORDLIMIT = 51 // max word size is 50
 const SHOWTIMES = false
-const SHOWCOUNTS = false  // number of words in each dictionary slot
+const SHOWCOUNTS = false // number of words in each dictionary slot
 
 func SortString(w string) string {
 	s := strings.Split(w, "")
@@ -71,7 +70,6 @@ func read_dict(dict []map[string]string, dictfilename string) (int, int) {
 	return maxlen, nwords
 }
 
-
 func main() {
 
 	if len(os.Args) < 2 {
@@ -91,7 +89,7 @@ func main() {
 	/*************************
 		Read the dictionary
 	**************************/
-	
+
 	m, n := read_dict(wordDict, DICTFILE)
 	maxlen := m
 	nwords := n
@@ -120,8 +118,13 @@ func main() {
 		Get the cipher
 	**************************/
 
-	c, _ := strconv.Atoi(os.Args[1]) // get the cipher number
-	ciphertext, err := lib.ReadCipher(DATAFILE, c)
+	p, _ := strconv.Atoi(os.Args[1]) // get the puzzle number
+	c := 1
+	if len(os.Args) > 2 {
+		c, _ = strconv.Atoi(os.Args[2]) // get the cipher number
+	}
+
+	ciphertext, err := lib.ReadCipher2(lib.DATAFILE, p, c)
 	if err != nil {
 		panic(err)
 	}
@@ -135,7 +138,7 @@ func main() {
 	for _, word := range words {
 		rword := reg.ReplaceAllString(word, "")
 		fmt.Println("word: ", rword)
-		guesses := make(map[string]struct{})  // effectively a "set"
+		guesses := make(map[string]struct{}) // effectively a "set"
 		start := time.Now()
 		lenword := len(word)
 		if lenword >= WORDLIMIT {
@@ -143,8 +146,9 @@ func main() {
 		}
 		sword := SortString(word)
 		for dword := range wordDict[lenword] {
+			// if the sorted cipher word equals the sorted dictionary word, it is an anagram.
 			if sword == wordDict[lenword][dword] {
-				guesses[dword] = struct {}{}
+				guesses[dword] = struct{}{}
 				fmt.Printf("%16s %s\n", "", dword)
 			}
 		}
