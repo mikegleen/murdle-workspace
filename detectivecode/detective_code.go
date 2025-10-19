@@ -24,17 +24,18 @@ func main() {
 	}
 	// fmt.Println(lokup)
 
-	p, _ := strconv.Atoi(os.Args[1]) // get the cipher number
+	p, _ := strconv.Atoi(os.Args[1]) // get the page number
 
 		c := 1
 	if len(os.Args) > 2 {
 		c, _ = strconv.Atoi(os.Args[2]) // get the cipher number
 	}
 
-	ciphertext, err := lib.ReadCipher2(lib.DATAFILE, p, c)
+	ciphertext, ciphertype, err := lib.ReadCipher2(lib.DATAFILE, p, c)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("Cipher type: %s\n", ciphertype)
 	ciphertextr := []rune(ciphertext)
 	plaintext := make([]rune, len(ciphertextr))
 	for i, r := range ciphertextr {

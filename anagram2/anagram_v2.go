@@ -124,11 +124,12 @@ func main() {
 		c, _ = strconv.Atoi(os.Args[2]) // get the cipher number
 	}
 
-	ciphertext, err := lib.ReadCipher2(lib.DATAFILE, p, c)
+	ciphertext, ciphertype, err := lib.ReadCipher2(lib.DATAFILE, p, c)
 	if err != nil {
 		panic(err)
 	}
-	reg, _ := regexp.Compile("[^A-Z]+") // remove everything except letters
+	fmt.Printf("Cipher type: %s\n", ciphertype)
+	letters_only_pat, _ := regexp.Compile("[^A-Z]+") // remove everything except letters
 	words := strings.Fields(ciphertext)
 
 	/*****************************
@@ -136,7 +137,7 @@ func main() {
 	******************************/
 
 	for _, word := range words {
-		rword := reg.ReplaceAllString(word, "")
+		rword := letters_only_pat.ReplaceAllString(word, "")
 		fmt.Println("word: ", rword)
 		guesses := make(map[string]struct{}) // effectively a "set"
 		start := time.Now()

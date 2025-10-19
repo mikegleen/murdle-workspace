@@ -72,7 +72,7 @@ func ReadCipher(filename string, key int) (string, error) {
 	return "", fmt.Errorf("no find cipher %d", key)
 
 }
-func ReadCipher2(filename string, puzzle int, cipher int) (string, error) {
+func ReadCipher2(filename string, puzzle int, cipher int) (string, string, error) {
 	/*
 		puzzle: The unique puzzle number from the book
 		cipher: The cipher in the puzzle. Mostly this is 1
@@ -114,9 +114,9 @@ func ReadCipher2(filename string, puzzle int, cipher int) (string, error) {
 		// fmt.Println(ix)
 		if puz == key {
 
-			return strings.Join(lineFields[3:], " "), nil
+			return strings.Join(lineFields[3:], " "), lineFields[2], nil
 		}
 	}
-	return "", fmt.Errorf("no find cipher %d", key)
+	return "", "", fmt.Errorf("no find cipher %d", key)
 
 }
